@@ -1,23 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { useState } from "react";
 
 function App() {
+  const initialNamesList = [
+    "Venkatesh Reddy",
+    "Vijay Kumar",
+    "Sai Krishna",
+    "Naveena",
+    "Sharaschandra",
+    "Udayasri",
+    "Srivani",
+    "Raghavendra",
+    "Vinay",
+  ];
+  
+  const [namesArray, setNamesArray] = useState([]);
+
+  const addNewName = () => {
+    const newNamesArray = namesArray.concat([initialNamesList[namesArray.length]])
+    setNamesArray(newNamesArray);
+  };
+  const deleteLastName = () => {
+    const tempNamesArray = [...namesArray];
+    tempNamesArray.splice(tempNamesArray.length - 1, 1);
+    setNamesArray(tempNamesArray);
+  }
+
+  // console.log(namesArray, 'namesArray')
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {namesArray.map((name) => {
+        return <h1>Hello {name}</h1>;
+      })}
+      <button onClick={addNewName} disabled={initialNamesList.length===namesArray.length}>Add Name</button>
+      
+      {
+        namesArray.length > 0 && <button onClick={deleteLastName}>Delete Last Name</button>
+      }
+      
+      <br />
+      <span>We have {namesArray.length} names right now.</span>
     </div>
   );
 }
