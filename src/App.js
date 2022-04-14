@@ -26,7 +26,6 @@ function App() {
     setNamesArray(tempNamesArray);
   }
 
-  // console.log(namesArray, 'namesArray')
   return (
     <div>
       {namesArray.map((name) => {

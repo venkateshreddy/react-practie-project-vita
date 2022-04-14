@@ -2,6 +2,13 @@
   text-align: center;
 }
 
+.address-block {
+  border: 1px solid #ccc;
+    float: left;
+    padding: 2%;
+    margin: 1%;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
