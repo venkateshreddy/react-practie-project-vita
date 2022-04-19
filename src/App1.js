@@ -1,133 +1,130 @@
-import { useState } from "react";
-import AddressCard from "./AddressCard";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import "./App.css";
+import StudentCard from "./StudentCard";
 
 function App1() {
   const [showForm, setShowForm] = useState(false);
-  const [addresses, setAddresses] = useState([
-    {
-        id: 1,
-      name: "Vijay Kumar K",
-      age: 33,
-      street: "Mankammathota",
-      city: "Karimnagar",
-      state: "Telangana",
-    },
-    {
-        id: 2,
-      name: "Suresh J",
-      age: 34,
-      street: "Some Street 2",
-      city: "Karimnagar",
-      state: "Telangana",
-    },
-    {
-        id: 3,
-      name: "Ramesh M",
-      age: 36,
-      street: "Some Street1",
-      city: "Karimnagar",
-      state: "Telangana",
-    },
-  ]);
-  const [latestId, setLatestId] = useState(3);
-  const dummyAddressObject = {
+  const [students, setStudents] = useState([]);
+  const dummyStudentObject = {
     name: "",
-    age: 0,
-    street: "",
-    city: "",
-    state: "",
+    email: 0,
+    dob: "",
+    gender: "",
+    branch: "",
   };
-  const [newAddress, setNewAddress] = useState({ ...dummyAddressObject });
+  const [newStudent, setNewStudent] = useState({ ...dummyStudentObject });
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/students")
+      .then((response) => {
+        if (response && response.data) {
+          setStudents(response.data);
+        }
+      })
+      .catch((err) => {
+        console.log(err, "here is my error");
+      });
+  }, []);
 
   const handleChange = (event) => {
-    // console.log(`Changing ${event.target.id} with value ${event.target.value}`);
-    
-    // const tempNewAddress = { ...newAddress };
-    // tempNewAddress[event.target.id] = event.target.value;
-    // setNewAddress(tempNewAddress);
-    setNewAddress({ ...newAddress, [event.target.id]: event.target.value });
+    setNewStudent({ ...newStudent, [event.target.id]: event.target.value });
   };
 
-  const addAddress = () => {
-    const newAddressList = [...addresses, { ...newAddress, id: latestId + 1 }];
-    //const newAddressList = [ ...addresses ]; newAdressList.push(newAddress);
-    //const newAddressList = [ ...addresses ].concat([newAddress])
-    setLatestId(latestId + 1);
-    setAddresses(newAddressList);
-    setNewAddress({ ...dummyAddressObject });
-    setShowForm(false);
+  const addStudent = () => {
+    axios
+      .post("http://localhost:8080/students", newStudent)
+      .then((response) => {
+        if (response && response.data) {
+          setStudents([...students, response.data]); //append new student to the list
+          setNewStudent({ ...dummyStudentObject });  //empty the new stdent object
+          setShowForm(false); //hide the form
+        }
+      })
+      .catch((err) => {
+        console.log(err, "here is my error");
+      });
   };
 
-  const deleteAddress = (id) => {
-      const newAddressList = addresses.filter(addr => addr.id !== id );
-      setAddresses(newAddressList);
-  }
+  const deleteStudent = (id) => {
+    axios
+      .delete(`http://localhost:8080/students/${id}`)
+      .then((response) => {
+        if (response && response.data) {
+          //filter the deleted student here
+          setStudents(students.filter(stu => stu._id !== id));
+        }
+      })
+      .catch((err) => {
+        console.log(err, "here is my error");
+      });
+  };
 
   return (
     <div>
       <h1>
-        Address Book{" "}
+        Students List{" "}
         {showForm === false && (
           <button onClick={() => setShowForm(true)}>Add New</button>
         )}
       </h1>
       {showForm && (
         <div>
-          <h2>Enter New Address Details</h2>
+          <h2>Enter New Student Details</h2>
           <div>
             <label>Name:</label>
             <input
               type={"text"}
               id="name"
-              value={newAddress.name}
+              value={newStudent.name}
               onChange={handleChange}
             />
           </div>
           <div>
-            <label>Age:</label>
-            <input
-              type={"number"}
-              id="age"
-              value={newAddress.age}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label>Address:</label>
+            <label>Email:</label>
             <input
               type={"text"}
-              id="street"
-              value={newAddress.street}
+              id="email"
+              value={newStudent.email}
               onChange={handleChange}
             />
           </div>
           <div>
-            <label>City:</label>
+            <label>dob:</label>
             <input
-              type={"text"}
-              id="city"
-              value={newAddress.city}
+              type={"date"}
+              id="dob"
+              value={newStudent.dob}
               onChange={handleChange}
             />
           </div>
           <div>
-            <label>State:</label>
+            <label>Gender:</label>
             <input
               type={"text"}
-              id="state"
-              value={newAddress.state}
+              id="gender"
+              value={newStudent.gender}
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <label>Branch:</label>
+            <input
+              type={"text"}
+              id="branch"
+              value={newStudent.branch}
               onChange={handleChange}
             />
           </div>
           <div>
             <button onClick={() => setShowForm(false)}>Cancel</button>
-            <button onClick={addAddress}>Submit</button>
+            <button onClick={addStudent}>Submit</button>
           </div>
         </div>
       )}
-      {addresses.map((addr) => (
-        <AddressCard address={addr} handleDelete={deleteAddress} />
+      {students.map((student) => (
+        <StudentCard student={student} handleDelete={deleteStudent} />
       ))}
     </div>
   );
