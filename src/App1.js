@@ -3,7 +3,7 @@ import axios from "axios";
 import "./App.css";
 import StudentCard from "./StudentCard";
 
-function App1() {
+export default function App1() {
   const [showForm, setShowForm] = useState(false);
   const [students, setStudents] = useState([]);
   const dummyStudentObject = {
@@ -14,10 +14,10 @@ function App1() {
     branch: "",
   };
   const [newStudent, setNewStudent] = useState({ ...dummyStudentObject });
-
+  const axiosConfig = { headers: { Authorization: `Bearer ${sessionStorage.getItem('college-management-system-token')}`} };
   useEffect(() => {
     axios
-      .get("http://localhost:8080/students")
+      .get("http://localhost:8080/students", axiosConfig)
       .then((response) => {
         if (response && response.data) {
           setStudents(response.data);
@@ -34,7 +34,7 @@ function App1() {
 
   const addStudent = () => {
     axios
-      .post("http://localhost:8080/students", newStudent)
+      .post("http://localhost:8080/students", newStudent, axiosConfig)
       .then((response) => {
         if (response && response.data) {
           setStudents([...students, response.data]); //append new student to the list
@@ -49,7 +49,7 @@ function App1() {
 
   const deleteStudent = (id) => {
     axios
-      .delete(`http://localhost:8080/students/${id}`)
+      .delete(`http://localhost:8080/students/${id}`, axiosConfig)
       .then((response) => {
         if (response && response.data) {
           //filter the deleted student here
@@ -61,6 +61,11 @@ function App1() {
       });
   };
 
+  const logout = () => {
+    sessionStorage.removeItem('college-management-system-token');
+    window.location.reload()
+  };
+
   return (
     <div>
       <h1>
@@ -68,6 +73,7 @@ function App1() {
         {showForm === false && (
           <button onClick={() => setShowForm(true)}>Add New</button>
         )}
+        <button onClick={logout}>Logout</button>
       </h1>
       {showForm && (
         <div>
@@ -129,5 +135,3 @@ function App1() {
     </div>
   );
 }
-
-export default App1;
