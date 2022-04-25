@@ -14,7 +14,8 @@ export default function App1() {
     branch: "",
   };
   const [newStudent, setNewStudent] = useState({ ...dummyStudentObject });
-  const axiosConfig = { headers: { Authorization: `Bearer ${sessionStorage.getItem('college-management-system-token')}`} };
+  const token = sessionStorage.getItem('college-management-system-token');
+  const axiosConfig = { headers: { Authorization: `Bearer ${token}`} };
   useEffect(() => {
     axios
       .get("http://localhost:8080/students", axiosConfig)
