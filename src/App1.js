@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
 import StudentCard from "./StudentCard";
+import { Form } from "react-bootstrap";
 
 export default function App1() {
   const [showForm, setShowForm] = useState(false);
@@ -13,6 +14,7 @@ export default function App1() {
     gender: "",
     branch: "",
   };
+  const [isEdit, setEdit] = useState(false);
   const [newStudent, setNewStudent] = useState({ ...dummyStudentObject });
   const token = sessionStorage.getItem('college-management-system-token');
   const axiosConfig = { headers: { Authorization: `Bearer ${token}`} };
@@ -41,6 +43,20 @@ export default function App1() {
           setStudents([...students, response.data]); //append new student to the list
           setNewStudent({ ...dummyStudentObject });  //empty the new stdent object
           setShowForm(false); //hide the form
+        }
+      })
+      .catch((err) => {
+        console.log(err, "here is my error");
+      });
+  };
+
+  const editStudent = (id) => {
+    axios
+      .get(`http://localhost:8080/students/${id}`, axiosConfig)
+      .then((response) => {
+        if (response && response.data) {
+          setEdit(true);
+          setNewStudent(response.data);
         }
       })
       .catch((err) => {
@@ -126,12 +142,12 @@ export default function App1() {
           </div>
           <div>
             <button onClick={() => setShowForm(false)}>Cancel</button>
-            <button onClick={addStudent}>Submit</button>
+            <button onClick={addStudent}>Submit</button> { /* this should get updated based on isEdit    */}
           </div>
         </div>
       )}
       {students.map((student) => (
-        <StudentCard student={student} handleDelete={deleteStudent} />
+        <StudentCard student={student} handleDelete={deleteStudent} handleEdit={editStudent} />
       ))}
     </div>
   );
