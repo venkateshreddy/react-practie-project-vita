@@ -6,5 +6,6 @@ export default function StudentCard(props) {
     <div><label>Gender: </label><span>{props.student.gender}</span></div>
     <div><label>Branch: </label><span>{props.student.branch}</span></div>
     <div><a style={{ float: 'right' }} href="#" onClick={() => props.handleDelete(props.student._id)}>Delete</a></div>
+    <div><a style={{ float: 'left' }} href="#" onClick={() => props.handleEdit(props.student._id)}>Edit</a></div>
 </div>)
 }

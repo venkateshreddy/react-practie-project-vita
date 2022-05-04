@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
 import StudentCard from "./StudentCard";
-import { Form } from "react-bootstrap";
+
+import AddStudentForm from './AddStudentForm';
+import { Col, Row } from "react-bootstrap";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function App1() {
   const [showForm, setShowForm] = useState(false);
-  const [students, setStudents] = useState([]);
   const dummyStudentObject = {
     name: "",
     email: 0,
@@ -14,16 +16,20 @@ export default function App1() {
     gender: "",
     branch: "",
   };
-  const [isEdit, setEdit] = useState(false);
+//   const [isEdit, setEdit] = useState(false);
   const [newStudent, setNewStudent] = useState({ ...dummyStudentObject });
   const token = sessionStorage.getItem('college-management-system-token');
   const axiosConfig = { headers: { Authorization: `Bearer ${token}`} };
+  
+  const students = useSelector(store => store.studentsReducer.students);
+
+  const dispatch = useDispatch();
   useEffect(() => {
     axios
       .get("http://localhost:8080/students", axiosConfig)
       .then((response) => {
         if (response && response.data) {
-          setStudents(response.data);
+          dispatch({ type: 'LOAD_STUDENTS', data: response.data });
         }
       })
       .catch((err) => {
@@ -31,16 +37,12 @@ export default function App1() {
       });
   }, []);
 
-  const handleChange = (event) => {
-    setNewStudent({ ...newStudent, [event.target.id]: event.target.value });
-  };
-
   const addStudent = () => {
     axios
       .post("http://localhost:8080/students", newStudent, axiosConfig)
       .then((response) => {
         if (response && response.data) {
-          setStudents([...students, response.data]); //append new student to the list
+          dispatch({ type: 'ADD_STUDENT', data: response.data });
           setNewStudent({ ...dummyStudentObject });  //empty the new stdent object
           setShowForm(false); //hide the form
         }
@@ -55,7 +57,7 @@ export default function App1() {
       .get(`http://localhost:8080/students/${id}`, axiosConfig)
       .then((response) => {
         if (response && response.data) {
-          setEdit(true);
+          // setEdit(true);
           setNewStudent(response.data);
         }
       })
@@ -70,7 +72,7 @@ export default function App1() {
       .then((response) => {
         if (response && response.data) {
           //filter the deleted student here
-          setStudents(students.filter(stu => stu._id !== id));
+          dispatch({ type: 'DELETE_STUDENT', id: id });
         }
       })
       .catch((err) => {
@@ -83,6 +85,10 @@ export default function App1() {
     window.location.reload()
   };
 
+  const handleChange = (key, value) => {
+    setNewStudent({ ...newStudent, [key]: value });
+  }
+
   return (
     <div>
       <h1>
@@ -92,63 +98,16 @@ export default function App1() {
         )}
         <button onClick={logout}>Logout</button>
       </h1>
-      {showForm && (
-        <div>
-          <h2>Enter New Student Details</h2>
-          <div>
-            <label>Name:</label>
-            <input
-              type={"text"}
-              id="name"
-              value={newStudent.name}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label>Email:</label>
-            <input
-              type={"text"}
-              id="email"
-              value={newStudent.email}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label>dob:</label>
-            <input
-              type={"date"}
-              id="dob"
-              value={newStudent.dob}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label>Gender:</label>
-            <input
-              type={"text"}
-              id="gender"
-              value={newStudent.gender}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <label>Branch:</label>
-            <input
-              type={"text"}
-              id="branch"
-              value={newStudent.branch}
-              onChange={handleChange}
-            />
-          </div>
-          <div>
-            <button onClick={() => setShowForm(false)}>Cancel</button>
-            <button onClick={addStudent}>Submit</button> { /* this should get updated based on isEdit    */}
-          </div>
-        </div>
-      )}
-      {students.map((student) => (
-        <StudentCard student={student} handleDelete={deleteStudent} handleEdit={editStudent} />
-      ))}
+      <Row>
+        <Col lg={5}>
+          <AddStudentForm handleChange={handleChange} handleAdd={addStudent} newStudent={newStudent} />
+        </Col>
+        <Col lg={7}>
+        {students.map((student) => (
+          <StudentCard student={student} handleEdit={editStudent} handleDelete={deleteStudent} />
+        ))}
+        </Col>
+      </Row>
     </div>
   );
 }
